@@ -95,33 +95,37 @@ export default function Dashboard() {
   };
 
   const saveTasks = async () => {
-    if (!taskDate) return toast.error("Please select a date");
-    if (tasks.length === 0) return toast.error("Please add at least 1 task");
+  if (!taskDate) return toast.error("Please select a date");
+  if (tasks.length === 0) return toast.error("Please add at least 1 task");
 
-    const cleanTasks = s.filter((t) => t.title.trim() !== "");
-    if (cleanTasks.length === 0)
-      return toast.error("Task title cannot be empty");
+  const cleanTasks = tasks.filter((t) => t.title.trim() !== "");
 
-    try {
-      setSavingTasks(true);
-      await api.post("/api/tasks/add", { date: taskDate, tasks: cleanTasks });
-      toast.success("Tasks saved successfully ✅");
+  if (cleanTasks.length === 0)
+    return toast.error("Task title cannot be empty");
 
-      // refresh task manager
-      fetchTasks();
+  try {
+    setSavingTasks(true);
 
-      // reset
-      setTasks([{ title: "", description: "" }]);
-      setTaskDate(getToday());
+    await api.post("/api/tasks/add", { date: taskDate, tasks: cleanTasks });
 
-      // after save auto open task manager
-      setActiveTab("taskManager");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save tasks ❌");
-    } finally {
-      setSavingTasks(false);
-    }
-  };
+    toast.success("Tasks saved successfully ✅");
+
+    // refresh task manager
+    fetchTasks();
+
+    // reset
+    setTasks([{ title: "", description: "" }]);
+    setTaskDate(getToday());
+
+    // after save auto open task manager
+    setActiveTab("taskManager");
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to save tasks ❌");
+  } finally {
+    setSavingTasks(false);
+  }
+};
+
 
   // -------------------------------
   // DOWNLOAD PDF

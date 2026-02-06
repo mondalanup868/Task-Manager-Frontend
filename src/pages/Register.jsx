@@ -51,7 +51,7 @@ export default function Register() {
 
       toast.success(res.data.message || "OTP sent ✅");
       setOtpSent(true);
-      setTimer(60); // 🔥 60 sec wait for resend
+      setTimer(60);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to send OTP ❌");
     } finally {
@@ -64,11 +64,12 @@ export default function Register() {
     e.preventDefault();
 
     if (!otpSent) return toast.error("Please send OTP first ❌");
-    if (!otp || otp.length !== 6) return toast.error("Enter valid 6-digit OTP ❌");
-
-    setLoading(true);
+    if (!otp || otp.length !== 6)
+      return toast.error("Enter valid 6-digit OTP ❌");
 
     try {
+      setLoading(true);
+
       const res = await api.post("/api/auth/verify-otp-register", {
         name,
         email,
@@ -78,7 +79,18 @@ export default function Register() {
         otp,
       });
 
-      localStorage.setItem("user", JSON.stringify(res.data));
+      // ✅ IMPORTANT: SAVE TOKEN + USER
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+
+      if (res.data?.user) {
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+      } else {
+        // fallback (if backend sends user directly)
+        localStorage.setItem("user", JSON.stringify(res.data));
+      }
+
       toast.success("Registered successfully ✅");
       navigate("/dashboard");
     } catch (err) {
@@ -166,7 +178,9 @@ export default function Register() {
             outline-none transition-all duration-300
             focus:border-purple-400/60 focus:shadow-[0_0_20px_rgba(168,85,247,0.25)]"
             value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onChange={(e) =>
+              setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+            }
             required
           />
         )}
@@ -198,7 +212,7 @@ export default function Register() {
           <option value="Operations Team">Operations Team</option>
         </select>
 
-        {/* Password + Show/Hide */}
+        {/* Password */}
         <div className="relative mb-5">
           <input
             type={showPassword ? "text" : "password"}
