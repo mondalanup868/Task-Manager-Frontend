@@ -22,6 +22,19 @@ export default function Register() {
 
   const navigate = useNavigate();
 
+  // ✅ Convert name to Proper Case (Anup Mondal)
+  const formatName = (value) => {
+    return value
+      .trim()
+      .replace(/\s+/g, " ")
+      .split(" ")
+      .map((word) => {
+        if (!word) return "";
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      })
+      .join(" ");
+  };
+
   // ✅ Timer countdown
   useEffect(() => {
     if (timer <= 0) return;
@@ -47,11 +60,17 @@ export default function Register() {
     try {
       setOtpLoading(true);
 
-      const res = await api.post("/api/auth/send-otp", { email });
+      // ✅ email lowercase before sending OTP
+      const cleanEmail = email.trim().toLowerCase();
+
+      const res = await api.post("/api/auth/send-otp", { email: cleanEmail });
 
       toast.success(res.data.message || "OTP sent ✅");
       setOtpSent(true);
       setTimer(60);
+
+      // update state also
+      setEmail(cleanEmail);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to send OTP ❌");
     } finally {
@@ -67,13 +86,23 @@ export default function Register() {
     if (!otp || otp.length !== 6)
       return toast.error("Enter valid 6-digit OTP ❌");
 
+    // ✅ Clean values before submit
+    const cleanName = formatName(name);
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmpid = empid.trim().toUpperCase();
+
+    // update UI values also
+    setName(cleanName);
+    setEmail(cleanEmail);
+    setEmpid(cleanEmpid);
+
     try {
       setLoading(true);
 
       const res = await api.post("/api/auth/verify-otp-register", {
-        name,
-        email,
-        empid,
+        name: cleanName,
+        email: cleanEmail,
+        empid: cleanEmpid,
         team,
         password,
         otp,
@@ -87,7 +116,6 @@ export default function Register() {
       if (res.data?.user) {
         localStorage.setItem("user", JSON.stringify(res.data.user));
       } else {
-        // fallback (if backend sends user directly)
         localStorage.setItem("user", JSON.stringify(res.data));
       }
 
@@ -143,7 +171,7 @@ export default function Register() {
           outline-none transition-all duration-300
           focus:border-cyan-400/60 focus:shadow-[0_0_20px_rgba(34,211,238,0.25)]"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value.toLowerCase())} // ✅ lowercase while typing
           required
         />
 
@@ -194,7 +222,7 @@ export default function Register() {
           outline-none transition-all duration-300
           focus:border-pink-400/60 focus:shadow-[0_0_20px_rgba(236,72,153,0.25)]"
           value={empid}
-          onChange={(e) => setEmpid(e.target.value)}
+          onChange={(e) => setEmpid(e.target.value.toUpperCase())} // ✅ uppercase while typing
           required
         />
 

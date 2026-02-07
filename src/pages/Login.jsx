@@ -50,7 +50,7 @@ export default function Login() {
         </h2>
 
         <p className="text-gray-400 text-sm text-center mb-6">
-          Login to manage your tasks & reports 🚀
+          Login to manage your tasks & reports 
         </p>
 
         {/* Email */}

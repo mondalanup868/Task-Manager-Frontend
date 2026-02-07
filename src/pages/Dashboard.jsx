@@ -40,6 +40,18 @@ export default function Dashboard() {
   // -------------------------------
   const getToday = () => new Date().toISOString().split("T")[0];
 
+  // ✅ Date format: DD/MM/YY
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yy = String(d.getFullYear()).slice(-2);
+
+    return `${dd}/${mm}/${yy}`;
+  };
+
   const getThisWeekRange = () => {
     const today = new Date();
     const day = today.getDay();
@@ -95,37 +107,36 @@ export default function Dashboard() {
   };
 
   const saveTasks = async () => {
-  if (!taskDate) return toast.error("Please select a date");
-  if (tasks.length === 0) return toast.error("Please add at least 1 task");
+    if (!taskDate) return toast.error("Please select a date");
+    if (tasks.length === 0) return toast.error("Please add at least 1 task");
 
-  const cleanTasks = tasks.filter((t) => t.title.trim() !== "");
+    const cleanTasks = tasks.filter((t) => t.title.trim() !== "");
 
-  if (cleanTasks.length === 0)
-    return toast.error("Task title cannot be empty");
+    if (cleanTasks.length === 0)
+      return toast.error("Task title cannot be empty");
 
-  try {
-    setSavingTasks(true);
+    try {
+      setSavingTasks(true);
 
-    await api.post("/api/tasks/add", { date: taskDate, tasks: cleanTasks });
+      await api.post("/api/tasks/add", { date: taskDate, tasks: cleanTasks });
 
-    toast.success("Tasks saved successfully ✅");
+      toast.success("Tasks saved successfully ✅");
 
-    // refresh task manager
-    fetchTasks();
+      // refresh task manager
+      fetchTasks();
 
-    // reset
-    setTasks([{ title: "", description: "" }]);
-    setTaskDate(getToday());
+      // reset
+      setTasks([{ title: "", description: "" }]);
+      setTaskDate(getToday());
 
-    // after save auto open task manager
-    setActiveTab("taskManager");
-  } catch (error) {
-    toast.error(error.response?.data?.message || "Failed to save tasks ❌");
-  } finally {
-    setSavingTasks(false);
-  }
-};
-
+      // after save auto open task manager
+      setActiveTab("taskManager");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to save tasks ❌");
+    } finally {
+      setSavingTasks(false);
+    }
+  };
 
   // -------------------------------
   // DOWNLOAD PDF
@@ -215,15 +226,6 @@ export default function Dashboard() {
         {/* Content */}
         <div className="relative z-10 p-6">
           <div className="max-w-6xl mx-auto">
-            {/* Heading */}
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-10"
-            >
-            </motion.div>
-
             {/* Tabs */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
               {/* Task Manager */}
@@ -232,10 +234,11 @@ export default function Dashboard() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab("taskManager")}
                 className={`cursor-pointer rounded-2xl p-6 border transition relative overflow-hidden
-                ${activeTab === "taskManager"
+                ${
+                  activeTab === "taskManager"
                     ? "bg-white/5 border-blue-500/70 shadow-[0_0_30px_rgba(59,130,246,0.25)]"
                     : "bg-white/3 border-white/10 hover:bg-white/5"
-                  }`}
+                }`}
               >
                 <div className="absolute inset-0 bg-linear-to-r from-blue-500/10 via-transparent to-cyan-500/10 opacity-70" />
                 <div className="relative flex items-center gap-4">
@@ -255,10 +258,11 @@ export default function Dashboard() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab("addTask")}
                 className={`cursor-pointer rounded-2xl p-6 border transition relative overflow-hidden
-                ${activeTab === "addTask"
+                ${
+                  activeTab === "addTask"
                     ? "bg-white/5 border-cyan-400/70 shadow-[0_0_30px_rgba(34,211,238,0.22)]"
                     : "bg-white/3 border-white/10 hover:bg-white/5"
-                  }`}
+                }`}
               >
                 <div className="absolute inset-0 bg-linear-to-r from-cyan-500/10 via-transparent to-blue-500/10 opacity-70" />
                 <div className="relative flex items-center gap-4">
@@ -278,10 +282,11 @@ export default function Dashboard() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab("reports")}
                 className={`cursor-pointer rounded-2xl p-6 border transition relative overflow-hidden
-                ${activeTab === "reports"
+                ${
+                  activeTab === "reports"
                     ? "bg-white/5 border-purple-400/70 shadow-[0_0_30px_rgba(168,85,247,0.22)]"
                     : "bg-white/3 border-white/10 hover:bg-white/5"
-                  }`}
+                }`}
               >
                 <div className="absolute inset-0 bg-linear-to-r from-purple-500/10 via-transparent to-pink-500/10 opacity-70" />
                 <div className="relative flex items-center gap-4">
@@ -298,7 +303,7 @@ export default function Dashboard() {
 
             <AnimatePresence mode="wait">
               {/* ============================= */}
-              {/* TASK MANAGER SECTION (PRO) */}
+              {/* TASK MANAGER SECTION */}
               {/* ============================= */}
               {activeTab === "taskManager" && (
                 <motion.div
@@ -363,22 +368,21 @@ export default function Dashboard() {
                         </div>
 
                         <button
-  onClick={() => fetchTasks()}
-  disabled={loadingTasks}
-  className="w-full px-5 py-2 rounded-xl font-semibold text-white
-  transition-all duration-300
-  bg-gradient-to-r from-blue-600/80 to-cyan-500/80
-  border border-white/10
-  cursor-pointer
-  shadow-lg shadow-blue-500/20
-  hover:from-blue-600 hover:to-cyan-500
-  hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/30
-  active:scale-95
-  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
->
-  {loadingTasks ? "Loading..." : "Fetch By Date Range"}
-</button>
-
+                          onClick={() => fetchTasks()}
+                          disabled={loadingTasks}
+                          className="w-full px-5 py-2 rounded-xl font-semibold text-white
+                          transition-all duration-300
+                          bg-gradient-to-r from-blue-600/80 to-cyan-500/80
+                          border border-white/10
+                          cursor-pointer
+                          shadow-lg shadow-blue-500/20
+                          hover:from-blue-600 hover:to-cyan-500
+                          hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/30
+                          active:scale-95
+                          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        >
+                          {loadingTasks ? "Loading..." : "Fetch By Date Range"}
+                        </button>
 
                         <button
                           onClick={() => {
@@ -388,18 +392,16 @@ export default function Dashboard() {
                             fetchTasks(week.from, week.to);
                           }}
                           className="w-full px-5 py-2 rounded-xl font-semibold transition-all duration-300
-  bg-gradient-to-r from-indigo-600/40 to-purple-600/40
-  border border-white/15 text-white
-  shadow-md shadow-indigo-500/10
-  cursor-pointer
-  hover:from-indigo-600 hover:to-purple-700
-  hover:border-white/30
-  hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30"
+                          bg-gradient-to-r from-indigo-600/40 to-purple-600/40
+                          border border-white/15 text-white
+                          shadow-md shadow-indigo-500/10
+                          cursor-pointer
+                          hover:from-indigo-600 hover:to-purple-700
+                          hover:border-white/30
+                          hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30"
                         >
                           View This Week
                         </button>
-
-
                       </div>
                     </div>
 
@@ -422,8 +424,9 @@ export default function Dashboard() {
                               className="border border-white/10 bg-black/30 p-6 rounded-2xl"
                             >
                               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+                                {/* ✅ DATE FORMAT FIXED HERE */}
                                 <h4 className="font-extrabold text-lg text-yellow-300">
-                                  📅 {r.date}
+                                  📅 {formatDate(r.date)}
                                 </h4>
 
                                 <div className="text-xs text-gray-400 bg-white/5 border border-white/10 px-3 py-1 rounded-xl">
@@ -468,7 +471,7 @@ export default function Dashboard() {
               )}
 
               {/* ============================= */}
-              {/* ADD TASK SECTION (PRO) */}
+              {/* ADD TASK SECTION */}
               {/* ============================= */}
               {activeTab === "addTask" && (
                 <motion.div
@@ -480,7 +483,6 @@ export default function Dashboard() {
                   transition={{ duration: 0.35 }}
                   className="rounded-2xl p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] mb-10"
                 >
-                  {/* Header */}
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                     <div>
                       <h3 className="text-2xl font-extrabold text-cyan-300 tracking-tight">
@@ -501,10 +503,8 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Divider */}
                   <div className="h-1px w-full bg-white/10 mb-6" />
 
-                  {/* Task Rows */}
                   <div className="space-y-4">
                     {tasks.map((task, index) => (
                       <motion.div
@@ -556,11 +556,7 @@ export default function Dashboard() {
                               className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-white w-full outline-none focus:ring-2 focus:ring-purple-500/50"
                               value={task.description}
                               onChange={(e) =>
-                                handleChange(
-                                  index,
-                                  "description",
-                                  e.target.value
-                                )
+                                handleChange(index, "description", e.target.value)
                               }
                             />
                           </div>
@@ -569,7 +565,6 @@ export default function Dashboard() {
                     ))}
                   </div>
 
-                  {/* Action Buttons */}
                   <div className="flex flex-col md:flex-row gap-4 mt-6">
                     <button
                       onClick={addNewRow}
@@ -591,12 +586,11 @@ export default function Dashboard() {
                       {savingTasks ? "Saving..." : "Save Task"}
                     </button>
                   </div>
-
                 </motion.div>
               )}
 
               {/* ============================= */}
-              {/* REPORT SECTION (PRO) */}
+              {/* REPORT SECTION */}
               {/* ============================= */}
               {activeTab === "reports" && (
                 <motion.div
@@ -608,19 +602,16 @@ export default function Dashboard() {
                   transition={{ duration: 0.35 }}
                   className="rounded-2xl p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)]"
                 >
-                  {/* Header */}
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                     <div>
                       <h3 className="text-2xl font-extrabold text-purple-300 tracking-tight">
-                        Select date and Generate Report 
+                        Select date and Generate Report
                       </h3>
                     </div>
                   </div>
 
-                  {/* Divider */}
                   <div className="h-px w-full bg-white/10 mb-6" />
 
-                  {/* Report Panel */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-2 bg-black/30 border border-white/10 rounded-2xl p-6">
                       <h4 className="text-lg font-bold text-white mb-4">
@@ -641,7 +632,9 @@ export default function Dashboard() {
                         </div>
 
                         <div className="flex flex-col">
-                          <label className="text-xs text-gray-400 mb-2">To</label>
+                          <label className="text-xs text-gray-400 mb-2">
+                            To
+                          </label>
                           <input
                             type="date"
                             className="bg-black/40 border border-white/10 px-4 py-2 rounded-xl text-white outline-none focus:ring-2 focus:ring-purple-500/50"
@@ -653,7 +646,6 @@ export default function Dashboard() {
                     </div>
 
                     <div className="bg-black/30 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
-
                       <button
                         onClick={downloadPDF}
                         disabled={downloadingPDF}

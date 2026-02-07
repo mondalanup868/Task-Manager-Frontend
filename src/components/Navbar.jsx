@@ -41,46 +41,64 @@ export default function Navbar() {
             onClick={() => setOpenProfile(!openProfile)}
             className="w-11 h-11 rounded-full overflow-hidden border cursor-pointer border-white/20 hover:scale-105 transition-all duration-300"
           >
-            <img src={Profile} alt="Profile" className="w-full h-full object-cover" />
+            <img
+              src={Profile}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
           </button>
 
           {/* ✅ Dropdown */}
           {openProfile && (
-            <div className="absolute top-16 right-0 w-72 bg-gray-800 border border-white/10 rounded-2xl shadow-xl p-4 z-50 animate-fadeIn">
-              
-              <div className="flex items-center gap-3 pb-3 border-b border-white/10 ">
-                <img src={Profile} alt=""  className="w-14 "/>
-                <div className="">
-                  <p className="text-white font-small">{user.name}</p>
-                  <p className="text-white font-small">{user.email}</p>
-                </div>
+            <div
+              className="absolute top-16 right-0 w-80 max-w-[90vw]
+              bg-gray-800 border border-white/10 rounded-2xl shadow-xl
+              p-4 z-50 animate-fadeIn"
+            >
+              {/* Top section */}
+              <div className="flex items-start gap-3 pb-3 border-b border-white/10">
+                <img src={Profile} alt="" className="w-14" />
 
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold">{user.name}</p>
+
+                  {/* ✅ Email overflow fixed */}
+                  <p className="text-gray-300 text-sm break-all">
+                    {user.email}
+                  </p>
+                </div>
               </div>
 
               {/* ✅ User Details */}
               <div className="mt-3 space-y-2 text-sm">
                 <p>
-                  <span className=" font-bold text-blue-400">Name : </span>{" "}
+                  <span className="font-bold text-blue-400">Name:</span>{" "}
                   <span className="text-white font-medium">{user.name}</span>
                 </p>
-                <p>
-                  <span className="font-bold text-blue-400">Email:</span>{" "}
-                  <span className="text-white font-medium">{user.email}</span>
+
+                <p className="flex gap-2">
+                  <span className="font-bold text-blue-400 whitespace-nowrap">
+                    Email:
+                  </span>
+
+                  {/* ✅ Email overflow fixed here also */}
+                  <span className="text-white font-medium break-all">
+                    {user.email}
+                  </span>
                 </p>
+
                 <p>
                   <span className="font-bold text-blue-400">Employee ID:</span>{" "}
                   <span className="text-white font-medium">{user.empid}</span>
                 </p>
+
                 <p>
                   <span className="font-bold text-blue-400">Team:</span>{" "}
                   <span className="text-white font-medium">{user.team}</span>
                 </p>
-
-                
-
               </div>
 
-              {/* ✅ Logout Button at Last */}
+              {/* ✅ Logout Button */}
               <button
                 onClick={logout}
                 className="w-full mt-4 px-4 py-2 rounded-xl font-semibold
